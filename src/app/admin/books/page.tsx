@@ -31,7 +31,17 @@ export default function BooksPage() {
       const res = await fetch('/api/admin/books');
       if (res.ok) {
         const data = await res.json();
-        setBooks(data.books || []);
+        // Map API response to the expected Book interface
+        const mappedBooks = (data.books || []).map((b: any) => ({
+          id: String(b.id),
+          title: b.title || '',
+          author: b.author || '',
+          category: b.categoryName || 'بدون تصنيف',
+          price: Number(b.price) || 0,
+          available: !!b.available,
+          coverImage: b.imageUrl,
+        }));
+        setBooks(mappedBooks);
       }
     } catch (error) {
       console.error('Error fetching books', error);
