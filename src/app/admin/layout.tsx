@@ -16,6 +16,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     // Check auth status
     const checkAuth = async () => {
+      if (pathname === '/admin/login') {
+        setLoading(false);
+        return;
+      }
       try {
         const res = await fetch('/api/admin/dashboard');
         if (res.ok) {
@@ -57,6 +61,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         جاري التحميل...
       </div>
     );
+  }
+
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
   }
 
   if (!isAuthenticated) {
