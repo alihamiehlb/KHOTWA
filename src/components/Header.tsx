@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "./CartProvider";
 import Image from "next/image";
 
@@ -10,6 +10,21 @@ export function Header() {
   const pathname = usePathname();
   const { getItemCount } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const res = await fetch('/api/admin/dashboard');
+        if (res.ok) {
+          setIsAdmin(true);
+        }
+      } catch {
+        // Not logged in
+      }
+    };
+    checkAdminStatus();
+  }, []);
 
   const navLinks = [
     { href: "/", label: "الرئيسية" },
@@ -41,12 +56,23 @@ export function Header() {
         </nav>
 
         <div className="header__actions">
-          <Link href="/admin/login" className="header__action-btn" aria-label="تسجيل الدخول للإدارة">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </Link>
+          {isAdmin ? (
+            <Link href="/admin" className="header__action-btn" aria-label="لوحة التحكم" title="لوحة التحكم">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </Link>
+          ) : (
+            <Link href="/admin/login" className="header__action-btn" aria-label="تسجيل الدخول" title="تسجيل الدخول">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </Link>
+          )}
 
           <Link href="/books" className="header__action-btn" aria-label="البحث">
             <svg

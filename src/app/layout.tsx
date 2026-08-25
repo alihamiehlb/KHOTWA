@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { CartProvider } from "@/components/CartProvider";
+import { LayoutWrapper } from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
   title: "خطوة - كتب رقمية ومنتجات",
@@ -21,11 +20,10 @@ export default function RootLayout({
       </head>
       <body>
         <CartProvider>
-          <Header />
-          <main className="main-content">{children}</main>
-          <Footer />
+          <LayoutWrapper>{children}</LayoutWrapper>
         </CartProvider>
       </body>
     </html>
   );
 }
+

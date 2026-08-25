@@ -6,30 +6,37 @@ import { errorResponse, successResponse } from '@/lib/security';
 
 export async function GET(request: Request) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
 
     const [{ value: totalBooks }] = await db.select({ value: count() }).from(books);
     const [{ value: availableBooks }] = await db.select({ value: count() }).from(books).where(eq(books.available, true));
     const outOfStockBooks = totalBooks - availableBooks;
 
-    const [{ value: totalOrders }] = await db.select({ value: count() }).from(orders);
     const [{ value: newOrders }] = await db.select({ value: count() }).from(orders).where(eq(orders.status, 'جديد'));
 
-    const recentOrders = await db.query.orders.findMany({
+    const rawRecentOrders = await db.query.orders.findMany({
       orderBy: [desc(orders.createdAt)],
       limit: 5,
-      with: {
-        items: true
-      }
     });
 
+    const recentOrders = rawRecentOrders.map((order) => ({
+      id: order.id,
+      customerName: order.customerName,
+      phone: order.customerPhone,
+      total: Number(order.total),
+      status: order.status,
+      date: order.createdAt,
+    }));
+
     return successResponse({
-      totalBooks,
-      availableBooks,
-      outOfStockBooks,
-      totalOrders,
-      newOrders,
-      recentOrders
+      adminEmail: session.email,
+      stats: {
+        totalBooks,
+        availableBooks,
+        outOfStockBooks,
+        newOrders,
+      },
+      recentOrders,
     });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {
